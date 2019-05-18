@@ -9,6 +9,8 @@ public class RunningHandler
     private float lerpTime2 = 0.0f;
     private bool isRunning = false;
     private bool wasRunningPrevious = false;
+    // must be inline with animator blend tree
+    private readonly float runToWalkTransitionThreshold = 0.2f;
     private readonly float runToWalkTransitionSpeed = 0.05f;
 
     // Gets a value that transistions from 0.5 to 1 or 1 to 0.5 
@@ -19,7 +21,7 @@ public class RunningHandler
         isRunning = running > 0.5f;
         bool wasRunningPressed = wasRunningPrevious != isRunning;
 
-        float runningModifier = isRunning ? Mathf.Lerp(1f, 0.5f, lerpTime2) : Mathf.Lerp(0.5f, 1f, lerpTime);
+        float runningModifier = isRunning ? Mathf.Lerp(1f, runToWalkTransitionThreshold, lerpTime2) : Mathf.Lerp(runToWalkTransitionThreshold, 1f, lerpTime);
 
         // prevent lerpTimes from being added to infinitely
         if (!isRunning && lerpTime <= 1.0f)
