@@ -8,17 +8,24 @@ public class WalkingAnimator : MonoBehaviour
     public Animator animator;
     public float inputX;
     public float inputY;
+    public float running;
+    private RunningHandler runningHandler;
     // Start is called before the first frame updatejjj
     void Start()
     {
+        runningHandler = new RunningHandler();
         animator = this.gameObject.GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        inputY = Input.GetAxis("Vertical");
-        inputX = Input.GetAxis("Horizontal");
+        running = Input.GetAxis("Running");
+        float runningModifier = runningHandler.GetIsRunningModifier(running);
+
+        inputY = Input.GetAxis("Vertical") * runningModifier;
+        inputX = Input.GetAxis("Horizontal") * runningModifier;
+
         animator.SetFloat("InputX", inputX);
         animator.SetFloat("InputY", inputY);
     }

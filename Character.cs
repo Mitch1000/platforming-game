@@ -8,6 +8,8 @@ public class Character : MonoBehaviour
     public float jumpMovementSpeed;
     public float jumpForce;
     public float fallSpeed;
+    public float running;
+    private RunningHandler runningHandler;
 
     public CharacterController controller;
 
@@ -16,6 +18,7 @@ public class Character : MonoBehaviour
 
     void Start()
     {
+        runningHandler = new RunningHandler();
         controller = GetComponent<CharacterController>();
     }
 
@@ -24,11 +27,14 @@ public class Character : MonoBehaviour
     {
         float yStory = movementDirection.y;
 
-        float horizontal = Input.GetAxis("Mouse X") * rotateSpeed;
+        float horizontal = Input.GetAxis("Horizontal");
         transform.Rotate(0, horizontal, 0);
 
+        running = Input.GetAxis("Running");
+        float runningModifier = runningHandler.GetIsRunningModifier(running);
+
         movementDirection = (transform.forward * -Input.GetAxis("Vertical"));
-        movementDirection = movementDirection.normalized * movementSpeed;
+        movementDirection = movementDirection.normalized * movementSpeed * runningModifier;
         movementDirection.y = yStory;
 
         if (controller.isGrounded)
@@ -44,6 +50,4 @@ public class Character : MonoBehaviour
 
         controller.Move(movementDirection * Time.deltaTime);
     }
-
-
 }
