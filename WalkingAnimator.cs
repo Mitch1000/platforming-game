@@ -10,6 +10,7 @@ public class WalkingAnimator : MonoBehaviour
     public float inputY;
     public float running;
     private RunningHandler runningHandler;
+
     // Start is called before the first frame updatejjj
     void Start()
     {

@@ -9,6 +9,7 @@ public class Character : MonoBehaviour
     public float jumpForce;
     public float fallSpeed;
     public float running;
+    public GameObject camera;
     private RunningHandler runningHandler;
 
     public CharacterController controller;
@@ -25,17 +26,19 @@ public class Character : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float yStory = movementDirection.y;
+        float originalY = movementDirection.y;
 
-        float horizontal = Input.GetAxis("Horizontal");
-        transform.Rotate(0, horizontal, 0);
+        movementDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+ 
+        if (movementDirection != Vector3.zero) {
+          transform.rotation = Quaternion.LookRotation(movementDirection);
+        }
 
         running = Input.GetAxis("Running");
         float runningModifier = runningHandler.GetIsRunningModifier(running);
 
-        movementDirection = (transform.forward * -Input.GetAxis("Vertical"));
-        movementDirection = movementDirection.normalized * movementSpeed * runningModifier;
-        movementDirection.y = yStory;
+        movementDirection = movementDirection * movementSpeed * runningModifier;
+        movementDirection.y = originalY;
 
         if (controller.isGrounded)
         {

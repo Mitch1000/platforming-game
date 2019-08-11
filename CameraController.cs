@@ -10,6 +10,8 @@ public class CameraController : MonoBehaviour
     public float maxViewAngle;
     public float minViewAngle;
     public bool invertY;
+
+    private Quaternion originalRotation;
     private Vector3 offset;
 
     // Start is called before the first frame update
@@ -17,7 +19,6 @@ public class CameraController : MonoBehaviour
     {
         offset = target.position - transform.position;
         pivot.position = target.position;
-        pivot.parent = target;
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -25,16 +26,16 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        // Get X Position of Mouse and Move Target(Character) 
-        float horizontal = Input.GetAxis("Mouse X") * rotateSpeed;
+        // Get X Position of Mouse and Move Target(Character)
+        float horizontal = Input.GetAxis("Mouse X") + Input.GetAxis("JoyCameraHorizontal") * rotateSpeed;
         pivot.Rotate(0, horizontal, 0);
 
 
-        // Get Y Position of Mouse and Move Pivot 
-        float vertical = Input.GetAxis("Mouse Y") * rotateSpeed;
+        // Get Y Position of Mouse and Move Pivot
+        float vertical = Input.GetAxis("Mouse Y") + Input.GetAxis("JoyCameraVertical") * rotateSpeed;
+
         if (invertY)
         {
-
             pivot.Rotate(vertical, 0, 0);
         }
         else
@@ -42,7 +43,7 @@ public class CameraController : MonoBehaviour
             pivot.Rotate(-vertical, 0, 0);
         }
 
-        // Limit up/down camera rotation 
+        // Limit up/down camera rotation
         if (pivot.rotation.eulerAngles.x > maxViewAngle && pivot.rotation.eulerAngles.x < 180f)
         {
             pivot.rotation = Quaternion.Euler(maxViewAngle, pivot.rotation.eulerAngles.y, 0);
