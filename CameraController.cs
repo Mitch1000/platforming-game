@@ -81,7 +81,7 @@ public class CameraController : MonoBehaviour
 
     if (!isCameraReseting) { return; }
 
-    pivot.rotation = Quaternion.RotateTowards(
+    pivot.rotation = Quaternion.Lerp(
       pivot.rotation,
       originalRotation * characterRotationAtTimeOfCameraReset,
       Time.deltaTime * cameraResetSpeed 
