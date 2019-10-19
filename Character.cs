@@ -9,55 +9,102 @@ public class Character : MonoBehaviour
   public float jumpForce;
   public float fallSpeed;
   public float rotationSpeed;
+  public float spinSpeed;
+  public float jumpDelay;
   public Transform pivot;
   public CharacterController controller;
-
-  private RunningHandler runningHandler;
-  private Vector3 movementDirection;
+  public CharacterAnimator characterAnimator;
+  
+  private bool isDrasticallyChangingDirection;
   private bool isCharacterRotating;
+  private bool isStartingJump = false;
+  private bool wasJumpCanceled = false;
+  private Vector3 movementDirection;
+  private Quaternion rotationDirection;
+  private RunningHandler runningHandler;
 
   // Start is called before the first frame update
   void Start()
   {
-      runningHandler = new RunningHandler();
-      controller = GetComponent<CharacterController>();
+    runningHandler = new RunningHandler();
+    controller = GetComponent<CharacterController>();
   }
 
   // Update is called once per frame
   void Update()
   {
-      float horizontalInput = Input.GetAxis("Horizontal");
-      float verticalInput = Input.GetAxis("Vertical");
+    // Animation must happen before the Character is moved.
+    characterAnimator.Animate();
 
-      float absHorizontalInput = Mathf.Abs(horizontalInput);
-      float absVericalInput = Mathf.Abs(verticalInput);
-      
-      bool isInputingDirection =  absHorizontalInput > 0f || absVericalInput > 0f;
-      handleChangeInRotation(horizontalInput, verticalInput, isInputingDirection);
+    float horizontalInput = Input.GetAxis("Horizontal");
+    float verticalInput = Input.GetAxis("Vertical");
 
-      calculateMovementDirection(absHorizontalInput, absVericalInput);
+    float absHorizontalInput = Mathf.Abs(horizontalInput);
+    float absVericalInput = Mathf.Abs(verticalInput);
+    
+    bool isInputingDirection =  absHorizontalInput > 0f || absVericalInput > 0f;
+    HandleChangeInRotation(horizontalInput, verticalInput, isInputingDirection);
 
-      handleJump();
-      // fall
-      movementDirection.y += Physics.gravity.y * fallSpeed;
-      // Give momentum to the Character
+    CalculateMovementDirection(absHorizontalInput, absVericalInput);
+
+    HandleJump();
+    // fall
+    movementDirection.y += Physics.gravity.y * fallSpeed;
+
+    // Give momentum to the Character
+    if (!isDrasticallyChangingDirection) {
       controller.Move(movementDirection * Time.deltaTime);
+    }
   }
 
-  private void handleJump() {
+  private void HandleJump() {
+    if (isStartingJump && !controller.isGrounded) {
+      wasJumpCanceled = true;
+    }
+
     if (controller.isGrounded)
     {
-      movementDirection.y = 0f;
       if (Input.GetButtonDown("Jump"))
       {
-        movementDirection.y = jumpForce;
+        StartCoroutine(InitiateJump());
       }
     }
   }
 
-  private void handleChangeInRotation(float horizontalInput, float verticalInput, bool isInputingDirection) {
-    if (isInputingDirection) {
+  private IEnumerator InitiateJump()
+  {
+    isStartingJump = true;
+
+    yield return new WaitForSeconds(jumpDelay);
+
+    if (!wasJumpCanceled) {
+      movementDirection.y = 0f;
+      movementDirection.y = jumpForce;
+      characterAnimator.TriggerIsJumping();
+    }
+
+    isStartingJump = false;
+    wasJumpCanceled = false;
+  }
+
+  private void HandleChangeInRotation(float horizontalInput, float verticalInput, bool isInputingDirection) {
+    if (isInputingDirection && !isDrasticallyChangingDirection) {
       isCharacterRotating = true;
+
+      float joystickAngle = Mathf.Atan2(horizontalInput, verticalInput) *
+        (180 / Mathf.PI);
+
+      rotationDirection = Quaternion.Euler(
+        0f,
+        joystickAngle + (pivot.eulerAngles.y - 180f),
+        0f
+      );
+
+      float changeInRotation = Mathf.Abs(
+        rotationDirection.eulerAngles.y - transform.rotation.eulerAngles.y
+      ); 
+
+      isDrasticallyChangingDirection = changeInRotation > 170 && changeInRotation < 190;
     }
 
     if (!isCharacterRotating) { return; }
@@ -74,28 +121,22 @@ public class Character : MonoBehaviour
     // Quaternions can only be multiplied and the order they are multiplied changes the angle that
     // is produced.
     
-    float joystickAngle = Mathf.Atan2(horizontalInput, verticalInput) *
-      (180 / Mathf.PI);
-
-    Quaternion rotationDirection = Quaternion.Euler(
-      0f,
-      joystickAngle + (pivot.eulerAngles.y - 180f),
-      0f
-    );
+    float rotationMultiplier = isDrasticallyChangingDirection ? spinSpeed : 1f;
     
     transform.rotation = Quaternion.RotateTowards(
       transform.rotation,
       rotationDirection,
-      Time.deltaTime * rotationSpeed 
+      Time.deltaTime * rotationSpeed * rotationMultiplier
     );
 
     bool isRotationComplete = transform.rotation == rotationDirection;
     if (isRotationComplete || !isInputingDirection) {
       isCharacterRotating = false;
+      isDrasticallyChangingDirection = false;
     }
   }
 
-  private void calculateMovementDirection(float absHorizontalInput, float absVericalInput) {
+  private void CalculateMovementDirection(float absHorizontalInput, float absVericalInput) {
     float running = Input.GetAxis("Running");
     float runningModifier = runningHandler.GetIsRunningModifier(running);
 
