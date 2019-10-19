@@ -38,7 +38,7 @@ public class CameraController : MonoBehaviour
 
     bool isCameraMovingManually = horizontalCameraInput != 0 || verticalCameraInput != 0;
 
-    handleCameraReset(isCameraMovingManually);
+    HandleCameraReset(isCameraMovingManually);
 
     // Get X Position of Mouse and Move Target(Character)
     float horizontalInvertMultiplier = invertX ? -1f : 1f;
@@ -50,7 +50,7 @@ public class CameraController : MonoBehaviour
     float vertical = verticalCameraInput * rotateSpeed * verticalInvertMultiplier; 
     pivot.Rotate(vertical, 0, 0);
 
-    limitUpDownCameraRotation();
+    LimitUpDownCameraRotation();
 
     // Move camera based on pivot position
     float desiredYAngle = pivot.eulerAngles.y;
@@ -71,7 +71,7 @@ public class CameraController : MonoBehaviour
     );
   }
 
-  private void handleCameraReset(bool isCameraMovingManually) {
+  private void HandleCameraReset(bool isCameraMovingManually) {
     // Camera Center button doesn't do anything while the Camera Control Joystick is active.
     // Centering the camera is canceled by Camera Control Joystick movement.
     if (Input.GetButtonDown("CenterCamera") && !isCameraMovingManually) {
@@ -93,7 +93,7 @@ public class CameraController : MonoBehaviour
     }
   }
 
-  private void limitUpDownCameraRotation() {
+  private void LimitUpDownCameraRotation() {
     if (pivot.rotation.eulerAngles.x > maxViewAngle && pivot.rotation.eulerAngles.x < 180f)
     {
       pivot.rotation = Quaternion.Euler(maxViewAngle, pivot.rotation.eulerAngles.y, 0);
