@@ -75,7 +75,11 @@ public class CameraController : MonoBehaviour
     // Camera Center button doesn't do anything while the Camera Control Joystick is active.
     // Centering the camera is canceled by Camera Control Joystick movement.
     if (Input.GetButtonDown("CenterCamera") && !isCameraMovingManually) {
-      characterRotationAtTimeOfCameraReset = target.rotation;
+      characterRotationAtTimeOfCameraReset = Quaternion.Euler(
+        0f,
+        target.rotation.eulerAngles.y,
+        0f
+      );
       isCameraReseting = true;
     }
 
