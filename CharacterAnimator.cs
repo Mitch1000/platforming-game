@@ -16,6 +16,7 @@ public class CharacterAnimator : MonoBehaviour
   private bool isStartingJump = false;
   private bool isJumping = false;
   private bool hasJumpReachedPeak = false;
+  private bool wasGrounded = true;
 
   // Start is called before the first frame update
   void Start()
@@ -38,12 +39,21 @@ public class CharacterAnimator : MonoBehaviour
     animator.SetFloat("InputX", inputX);
     animator.SetFloat("InputY", inputY);
 
-    HandleJumping();
+    HandleJumping(isWalking);
     animator.SetBool("IsGrounded", controller.isGrounded);
     animator.SetBool("IsWalking", isWalking);
   }
 
-  private void HandleJumping() {
+  private void HandleJumping(bool isWalking) {
+    if (controller.isGrounded && !wasGrounded) {
+      if (isWalking) {
+        animator.Play("Landing Running");
+      } else {
+        animator.Play("Landing Idle");
+      }
+    }
+    wasGrounded = controller.isGrounded;
+
     if (Input.GetButtonDown("Jump") && controller.isGrounded) {
       isStartingJump = true;
       animator.SetTrigger("IsStartingJump");
@@ -55,7 +65,7 @@ public class CharacterAnimator : MonoBehaviour
     if (!isJumping) {
       if (!controller.isGrounded) {
         isStartingJump = false; 
-        // Set to falling animation once the animation is created.
+        // TODO: Set to second falling animation once the animation is created.
         animator.SetTrigger("IsFalling");
       }
 
