@@ -11,6 +11,7 @@ public class Character : MonoBehaviour
   public float rotationSpeed;
   public float spinSpeed;
   public float jumpDelay;
+  public float maximumFallSpeed;
   public Transform pivot;
   public CharacterController controller;
   public CharacterAnimator characterAnimator;
@@ -19,6 +20,7 @@ public class Character : MonoBehaviour
   private bool isCharacterRotating;
   private bool isStartingJump = false;
   private bool wasJumpCanceled = false;
+  private float initialFallVelocity;
   private Vector3 movementDirection;
   private Quaternion rotationDirection;
   private RunningHandler runningHandler;
@@ -28,6 +30,7 @@ public class Character : MonoBehaviour
   {
     runningHandler = new RunningHandler();
     controller = GetComponent<CharacterController>();
+    initialFallVelocity = Physics.gravity.y * fallSpeed;
   }
 
   // Update is called once per frame
@@ -48,8 +51,8 @@ public class Character : MonoBehaviour
     CalculateMovementDirection(absHorizontalInput, absVericalInput);
 
     HandleJump();
-    // fall
-    movementDirection.y += Physics.gravity.y * fallSpeed;
+
+    HandleGravity();
 
     // Give momentum to the Character
     if (!isDrasticallyChangingDirection) {
@@ -134,6 +137,20 @@ public class Character : MonoBehaviour
       isCharacterRotating = false;
       isDrasticallyChangingDirection = false;
     }
+  }
+
+  private void HandleGravity() {
+    if (controller.isGrounded && movementDirection.y < initialFallVelocity) {
+      // be held n the ground by the force of gravity 
+      movementDirection.y = initialFallVelocity;
+      return;
+    }
+    // fall with increasing speed unil maximum speed is reached.
+    if (movementDirection.y > maximumFallSpeed) {
+      movementDirection.y += initialFallVelocity;
+      return;
+    } 
+    movementDirection.y = maximumFallSpeed;
   }
 
   private void CalculateMovementDirection(float absHorizontalInput, float absVericalInput) {
