@@ -51,11 +51,13 @@ public class CharacterAnimator : MonoBehaviour
       } else {
         animator.Play("Landing Idle");
       }
+      animator.ResetTrigger("IsStartingToLand");
     }
     wasGrounded = controller.isGrounded;
 
     if (Input.GetButtonDown("Jump") && controller.isGrounded) {
       isStartingJump = true;
+      animator.ResetTrigger("IsStartingToLand");
       animator.SetTrigger("IsStartingJump");
       highestJumpHeight = Mathf.Round(transform.position.y * 100) / 100;
     }
