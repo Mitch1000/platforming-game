@@ -87,7 +87,7 @@ public class CharacterAnimator : MonoBehaviour
     if (Physics.Raycast(transform.position, -Vector3.up, out hit, Mathf.Infinity, raycastLayerMask)) {
       float distanceToFloor = hit.distance;
       if (distanceToFloor < distanceToStartLanding) {
-        animator.SetTrigger("IsFalling");
+        animator.SetTrigger("IsStartingToLand");
         isJumping = false;
         hasJumpReachedPeak = false;
         isStartingJump = false;
