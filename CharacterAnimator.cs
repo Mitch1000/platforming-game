@@ -67,8 +67,7 @@ public class CharacterAnimator : MonoBehaviour
     if (!isJumping) {
       if (!controller.isGrounded) {
         isStartingJump = false; 
-        // TODO: Set to second falling animation once the animation is created.
-        animator.SetTrigger("IsFalling");
+        animator.Play("Falling");
       }
 
       return;
